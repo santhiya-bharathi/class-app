@@ -1,38 +1,124 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+body{
+ 
   min-height: 100vh;
+}
+.not-found-name{
+  text-align: center;
+  color: teal;
+}
+.not-found-pic{
+
+display: flex;
+justify-content: center;
+align-items: center;
+flex-direction: column;
+}
+.ul-list{
+  list-style: none;
+  display: flex;
+}
+.in-con{
   display: flex;
   flex-direction: column;
-  align-items: center;
+ gap: 10px;
+}
+.user-pic{
+  height: 400px;
+  object-fit: cover;
+  width: 400px;
+}
+.user-name{
+  margin: 0;
+}
+
+.container{
+display: inline-grid;
+justify-content: space-evenly;
+    align-items: center;
+    justify-items: center;
+margin: 15px;
+
+}
+
+.full-det{
+  border-radius: 5px;
+  width: 400px;
+  overflow: hidden;
+  font-family: sans-serif;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+  border: gray solid 3px;
+  height: min-content;
+}
+.button-like{
+  display: flex;
+  justify-content: flex-start;
+}
+
+.details{
+  text-align: center;
+  
+ font-weight: 500;
+ padding: 10px;
+}
+.det{
+  display: flex;
+  justify-content: space-between;
+    align-items: center;
+}
+.full-det:hover{
+ 
+  border: black solid 3px ;
+transform: scale(1.1);
+box-shadow: 5px 5px 5px rgb(46, 45, 45);
+}
+.home-hello{
+  margin: 0;
+}
+.home-pic{
+  width: 100rem;
+  height: 42rem;
+}
+.home{
+  color: crimson;
+  text-align: center;
+  font-weight: 900;
+  font-size: 3rem;
+ display: flex;
+ justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.edit-delete{
+  display: flex;
+  justify-content: flex-end;
+}
+.count-edit{
+  display: flex;
+
+}
+
+.game-box{
+  background-color: white;
+  color: black;
+  height: 6rem;
+  width: 6rem;
+  font-size: 5rem;
+  display: flex;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  align-content: center;
+  align-items: center;
+  cursor:pointer;
+  border: black 2px solid;
 }
-
-.App-link {
-  color: #61dafb;
+.board{
+display: grid;
+grid-template-columns: repeat(3,1fr);
+width: min-content;
 }
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.full-game{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
