@@ -1,6 +1,6 @@
 import './App.css';
 
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import { Switch, Route, Redirect, useParams } from "react-router-dom";
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -20,53 +20,14 @@ import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 
 import { useHistory } from "react-router-dom";
+import { useFormik } from 'formik';
+import * as yup from 'yup';
+
 
 export default function App() {
   // console.log("hi");
-  const INITIAL_MOVIES = [{
-    name:"Avatar",
-    pic:"https://cdna.artstation.com/p/assets/images/images/031/645/214/large/shreyas-raut-avatar-2.jpg?1604210989&dl=1",
-    rating:7.8,
-    summary:"On the lush alien world of Pandora live the Na'vi, beings who appear primitive but are highly evolved. Because the planet's environment is poisonous, human/Na'vi hybrids. Jake Sully a paralyzed former Marine, becomes mobile again through one such Avatar and falls in love with a Na'vi woman. As a bond with her grows, he is drawn into a battle for the survival of her world.",
-    trailer:"https://www.youtube.com/embed/5PSNL1qE6VY"  
-  },
-{
-  name:"Master",
-  pic:"https://pbs.twimg.com/media/ENHK08SUEAEdnAx.jpg",
-  rating:7.8,
-  summary:"Troubled alcoholic teacher JD is sent to teach at a juvenile reform school. But when he realises a dangerous criminal is using his students to cover up his crimes, JD sets out to stop him. Strong violence, drug misuse.",
-  trailer:"https://www.youtube.com/embed/UTiXQcrLlv4"
-},
-{
-  name:"96",
-  pic:"https://moviegalleri.net/wp-content/uploads/2018/07/Trisha-Krishnan-Vijay-Sethupathi-96-Movie-New-Poster.jpg",
-  rating:8.6,
- summary:"K Ramachandran, a photographer, gets nostalgic after he visits his school in his hometown. During a reunion with his classmates, he meets Janaki, his childhood sweetheart.",
- trailer:"https://www.youtube.com/embed/r0synl-lI4I"
-},
-{
-  name:"Pelli Choopulu",
-  pic:"https://wallpapercave.com/wp/wp7024418.jpg",
-  rating:8.2,
- summary:"Vijay's father, who is fed up with Vijay's carefree life, decides to make him marry a girl in hopes that he might become a responsible man. However, meeting an ambitious girl changes his life for the better.",
- trailer:"https://www.youtube.com/embed/9v9nESxBpqU"
-},
- {
-  name:"Jagame Thandhiram",
-  pic:"https://www.kollywoodzone.com/data/media/11148/jagame_thanthiram_movie_posters_03.jpg",
-  rating:6,
- summary:"Suruli, a kind-hearted gangster, goes to London and gets embroiled in several criminal activities. However, the stakes get higher when he falls in love with a beautiful singer named Attila.",
- trailer:"https://www.youtube.com/embed/2OtgYcd83Qg"
-},
- {
-  name:"squid game",
-  pic:"https://cdn.vox-cdn.com/thumbor/vmRga6mG5sihYrHyZ43WswwtyIU=/1400x1050/filters:format(jpeg)/cdn.vox-cdn.com/uploads/chorus_asset/file/22911132/EN_SQdGame_Main_PlayGround_Horizontal_RGB_PRE.jpeg",
-  rating:8.1,
- summary:"Squid Game's basic story revolves around 456 heavily debt-ridden people from different age groups and strata of society, who participate in six rounds of various children's games to win a humongous sum of money.",
- trailer:"https://www.youtube.com/embed/oqxAJKy0ii4"
-}
-];
-const [movies, setMovies] = useState(INITIAL_MOVIES);
+
+const [movies, setMovies] = useState([]);
 const history = useHistory();
 const [mode, setMode] = useState("dark");
 const darkTheme = createTheme({
@@ -74,6 +35,15 @@ const darkTheme = createTheme({
     mode: mode,
   },
 });
+
+// App is mounted -> useEffect call only once -> inside fetch -> and setMovies 
+console.log(movies);
+useEffect(()=>{
+  fetch("https://616d58f537f997001745d9d1.mockapi.io/movies", {method:"GET"})
+  .then((data)=>data.json())
+  .then((mvs)=>setMovies(mvs));
+}, []);
+
   return (
     <ThemeProvider theme={darkTheme}>
       <Paper elevation={3} style={{borderRadius:"0px",minHeight:"100vh"}}>
@@ -87,6 +57,7 @@ const darkTheme = createTheme({
 
        <Button varient="text" color="inherit" onClick={()=>history.push("/addcolor")}>Addcolor</Button>
        <Button varient="text" color="inherit" onClick={()=>history.push("/tic-tac-toe")}>Tic-Tac-Toe Game</Button>
+       <Button varient="text" color="inherit" onClick={()=>history.push("/basicform")}>Basic Form</Button>
 
        <Button varient="text" color="inherit" style={{marginLeft:"auto"}} onClick={()=>setMode(mode==="light"? "dark":"light")}> {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />} {mode==="light"? "Dark":"Light"}Mode</Button>
        </Toolbar>
@@ -103,19 +74,19 @@ const darkTheme = createTheme({
         </Route>
        
         <Route path="/addmovies">
-          <AddMovie movies={movies} setMovies={setMovies}/>
+          <AddMovie />
         </Route>
 
         <Route path="/movielist/edit/:id">
-        <EditMovie movies={movies} setMovies={setMovies}/>
+        <EditMovie />
         </Route>
 
         <Route path="/movielist/:id">
-        <MovieDetails movies={movies}/>
+        <MovieDetails />
         </Route>
 
         <Route path="/movielist">
-        <MovieList movies={movies} setMovies={setMovies}/>
+        <MovieList />
         </Route>
 
         <Route path="/addcolor">
@@ -125,6 +96,12 @@ const darkTheme = createTheme({
         <Route path="/tic-tac-toe">
         <TicTacToe/>
         </Route> 
+
+        
+        <Route path="/basicform">
+        <BasicForm/>
+        </Route> 
+
 
         <Route path="**">
           <NotFound/>
@@ -140,6 +117,73 @@ const darkTheme = createTheme({
   );
 }
 //when two  components needs the same data(movies)-> put the data in the common parent component (App) - HOC - Higher order components 
+
+// const validateForm = (values) => {
+//   const errors = {};
+//   console.log("validateform", values);
+
+  // email min 5 chars
+  // if(values.email.length < 5){
+  //   errors.email = "please provide a longer email";
+  // }  
+  // else if (!/^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$.test(values.email)){
+  //   errors.email = "invalid email address";
+  // }
+  //min 8 chars
+  // if(values.password.length < 8){
+  //   errors.password = "please provide a longer password";
+  // }
+  //max 12 chars
+//   else if(values.password.length > 12){
+//     errors.password = "please provide a shorter password";
+//   }
+//   console.log(errors);
+//   return errors;
+// }
+ const formvalidationschema = yup.object({
+   email: yup.string().min(5, "need a bigger email").required(),
+   password: yup.string().min(5).max(12).required(),
+ });
+
+function BasicForm(){
+
+  const {handleSubmit, values, handleChange, handleBlur, errors, touched} = useFormik({
+    initialValues: { email: "", password:""},
+    // validate: validateForm,
+    validationSchema: formvalidationschema,
+
+    onSubmit: (values) => {
+      console.log("onsubmit", values);
+    }
+  });
+
+  return(
+    <form onSubmit={handleSubmit}>
+      <input id="email" 
+      name="email" 
+      value = {values.email} 
+      onChange={handleChange} 
+      onBlur={handleBlur}
+      type = "email" 
+      placeholder = "Enter your Email"/>
+{/* only when the user moves away show the error */}
+     {errors.email && touched.email && errors.email}
+
+      <input id="password" 
+      name="password" 
+      value = {values.password} 
+      onChange={handleChange} 
+      onBlur={handleBlur}
+      type = "password" 
+      placeholder = "Enter your Password"/>
+
+      {/* only when the user moves away show the error */}
+      {errors.password && touched.password ? errors.password:""}
+    
+      <button type="submit" >submit</button>
+    </form>
+  );
+}
 
 function TicTacToe(){
   const [board, setBoard] = useState([null,null,null,null,null,null,null,null,null]);
@@ -210,15 +254,25 @@ function Home() {
   return (
     <div className="home">
       <h2 className="home-hello">Hello All!!!</h2>
-      <img className="home-pic" src="https://cdn.dribbble.com/users/27231/screenshots/2432051/welcome.gif" alt="welcome"/>
+      <img className="home-pic" src="https://c.tenor.com/NuKLjcqaiqsAAAAC/welcome.gif" alt="welcome"/>
     </div>
   );
 }
 
-function MovieDetails({movies}){
+function MovieDetails() {
   const history = useHistory();
   const {id} = useParams();
-  const moviedet = movies[id]; 
+  // const moviedet = movies[id]; 
+  console.log("the id is ", id);
+
+const [moviedet, setMoviedet] = useState({});
+
+useEffect(()=>{
+  fetch(`https://616d58f537f997001745d9d1.mockapi.io/movies/${id}`, {method:"GET"})
+  .then((data)=>data.json())
+  .then((mv)=>setMoviedet(mv));
+}, [id]);
+
   console.log(moviedet);
   const styles = {
     color: moviedet.rating<8? "crimson":"green",
@@ -240,85 +294,225 @@ function MovieDetails({movies}){
   );
 }
 
-function EditMovie({movies,setMovies}){
-  const history = useHistory();
+function EditMovie(){
+ 
   const {id} = useParams();
-  const moviedet = movies[id]; 
-  const [name, setName] = useState(moviedet.name);
-  const [pic, setPic] = useState(moviedet.pic);
-  const [rating, setRating] = useState(moviedet.rating);
-  const [summary, setSummary] = useState(moviedet.summary);
-  const [trailer, setTrailer] = useState(moviedet.trailer);
+  // const moviedet = movies[id]; 
+const [moviedet, setMoviedet] = useState(null);
+useEffect(()=>{
+  fetch(`https://616d58f537f997001745d9d1.mockapi.io/movies/${id}`, {method:"GET"})
+  .then((data)=>data.json())
+  .then((mv)=>setMoviedet(mv));
+}, [id]);
+//only show update movie when data is available
+  return moviedet? <UpdateMovie moviedet={moviedet}/>:"";
   
+}
+function UpdateMovie({moviedet}){
+  const history = useHistory();
+
+  const formvalidationschema = yup.object({
+    pic: yup.string().required("why not fill this pic?").min(4),
+    name: yup.string().required("why not fill this name?").min(1),
+    rating: yup.number().required("why not fill this rating?").min(0).max(10),
+    summary: yup.string().required("why not fill this summary?").min(20),
+    trailer: yup.string().required("why not fill this trailer?").min(5),
+  });
+
+  const {handleSubmit, values, handleChange, handleBlur, errors, touched} = useFormik({
+    initialValues: { name: moviedet.name, pic:moviedet.pic, rating:moviedet.rating, summary:moviedet.summary, trailer:moviedet.trailer},
+    // validate: validateForm,
+    validationSchema: formvalidationschema,
   
-  const editMovie =()=>{
-    
-    const updatedMovie= {pic, name, rating, summary,trailer};//shorthand
+    onSubmit: (updatedMovie) => {
+      console.log("onsubmit", updatedMovie);
+      editMovie(updatedMovie);
+    }
+  });
+  // const [name, setName] = useState(moviedet.name);
+  // const [pic, setPic] = useState(moviedet.pic);
+  // const [rating, setRating] = useState(moviedet.rating);
+  // const [summary, setSummary] = useState(moviedet.summary);
+  // const [trailer, setTrailer] = useState(moviedet.trailer);
+
+  const editMovie =(updatedMovie)=>{
+   
+    // const updatedMovie= {pic, name, rating, summary,trailer};//shorthand
     console.log(updatedMovie);
     // setMovies([...movies,updatedMovie]);
-    const copyMovieList =[...movies];
-    copyMovieList[id] = updatedMovie;
-    setMovies(copyMovieList);
-    history.push("/movielist");
+    // const copyMovieList =[...movies];
+    // copyMovieList[id] = updatedMovie;
+    // setMovies(copyMovieList);
+    // history.push("/movielist");
+    // 1. method - put
+  // 2. body - data & json & pass id as params
+  // 3. headers - JSON
+
+  fetch(`https://616d58f537f997001745d9d1.mockapi.io/movies/${moviedet.id}`, {
+    method:"PUT",
+    body: JSON.stringify(updatedMovie),
+    headers: {'Content-Type': 'application/json'},
+}).then(()=>history.push("/movielist"))
   };
+
+  
   return(
-<div className="in-con">
-
-<TextField value={pic} 
-      onChange={(event)=>setPic(event.target.value)}  label="enter movie url" variant="filled" />
-     
-     <TextField value={name}
-      onChange={(event)=>setName(event.target.value)} label="enter movie name" variant="filled" />
-
-      <TextField value={rating}
-      onChange={(event)=>setRating(event.target.value)}  label="enter movie rating" variant="filled" />
-
-      <TextField value={summary}
-      onChange={(event)=>setSummary(event.target.value)}  label="enter movie summary" variant="filled" />
-
-      <TextField value={trailer}
-      onChange={(event)=>setTrailer(event.target.value)}  label="enter movie trailer" variant="filled" />
+    <form onSubmit={handleSubmit} className="in-con">
     
-      <Button onClick={editMovie} variant="contained">Save</Button>
+    <TextField id="pic" 
+      name="pic" 
+      value = {values.pic} 
+      onChange={handleChange} 
+      onBlur={handleBlur}
+       label="enter movie url" 
+       error={errors.pic && touched.pic}
+       helperText={errors.pic && touched.pic && errors.pic}
+       variant="filled" />
+       
      
-    </div>
-  );
-}
-function AddMovie({movies,setMovies}){
-  const history = useHistory();
-  const [name, setName] = useState("");
-const [pic, setPic] = useState("");
-const [rating, setRating] = useState("");
-const [summary, setSummary] = useState("");
-const [trailer, setTrailer] = useState("");
+     <TextField id="name" 
+      name="name" 
+      value = {values.name} 
+      onChange={handleChange} 
+      onBlur={handleBlur}
+      label="enter movie name"
+      error={errors.name && touched.name}
+      helperText={errors.name && touched.name && errors.name}
+       variant="filled" />
+      
 
-const addMovie =()=>{
-  const newMovies= {pic, name, rating, summary,trailer};//shorthand
-  setMovies([...movies,newMovies]);
-  history.push("/movielist");
+      <TextField id="rating" 
+      name="rating" 
+      value = {values.rating} 
+      onChange={handleChange} 
+      onBlur={handleBlur}  
+      label="enter movie rating" 
+      error={errors.rating && touched.rating}
+       helperText={errors.rating && touched.rating && errors.rating}
+      variant="filled" />
+      
+
+      <TextField id="summary" 
+      name="summary" 
+      value = {values.summary} 
+      onChange={handleChange} 
+      onBlur={handleBlur}  label="enter movie summary" 
+      error= {errors.summary && touched.summary}
+      helperText= {errors.summary && touched.summary && errors.summary}
+      variant="filled" />
+     
+      <TextField id="trailer" 
+      name="trailer" 
+      value = {values.trailer} 
+      onChange={handleChange} 
+      onBlur={handleBlur}  label="enter movie trailer"
+      error=  {errors.trailer && touched.trailer}
+      helperText= {errors.trailer && touched.trailer && errors.trailer}
+      variant="filled" />
+     
+          <Button type="submit" variant="contained">Save</Button>
+         
+        </form>
+      );
+}
+
+
+function AddMovie(){
+  const history = useHistory();
+//   const [name, setName] = useState("");
+// const [pic, setPic] = useState("");
+// const [rating, setRating] = useState("");
+// const [summary, setSummary] = useState("");
+// const [trailer, setTrailer] = useState("");
+
+const formvalidationschema = yup.object({
+  pic: yup.string().required("why not fill this pic?").min(4),
+  name: yup.string().required("why not fill this name?").min(1),
+  rating: yup.number().required("why not fill this rating?").min(0).max(10),
+  summary: yup.string().required("why not fill this summary?").min(20),
+  trailer: yup.string().required("why not fill this trailer?").min(5),
+});
+
+const {handleSubmit, values, handleChange, handleBlur, errors, touched} = useFormik({
+  initialValues: { name: "", pic:"", rating:"", summary:"", trailer:""},
+  // validate: validateForm,
+  validationSchema: formvalidationschema,
+
+  onSubmit: (newMovies) => {
+    console.log("onsubmit", newMovies);
+    addMovie(newMovies);
+  }
+});
+
+const addMovie =(newMovies)=>{
+//   const newMovies= {pic, name, rating, summary,trailer};//shorthand
+//   // setMovies([...movies,newMovies]);
+console.log(newMovies)
+  fetch(`https://616d58f537f997001745d9d1.mockapi.io/movies`, {
+    method:"POST",
+    body: JSON.stringify(newMovies),
+    headers: {'Content-Type': 'application/json'},
+}).then(()=>history.push("/movielist"));
+  
 };
 
   return(
-<div className="in-con">
+<form onSubmit={handleSubmit} className="in-con">
 
-<TextField value={pic} 
-      onChange={(event)=>setPic(event.target.value)}  label="enter movie url" variant="filled" />
+<TextField id="pic" 
+      name="pic" 
+      value = {values.pic} 
+      onChange={handleChange} 
+      onBlur={handleBlur}
+       label="enter movie url" 
+       error={errors.pic && touched.pic}
+       helperText={errors.pic && touched.pic && errors.pic}
+       variant="filled" />
+       
      
-     <TextField value={name}
-      onChange={(event)=>setName(event.target.value)} label="enter movie name" variant="filled" />
+     <TextField id="name" 
+      name="name" 
+      value = {values.name} 
+      onChange={handleChange} 
+      onBlur={handleBlur}
+      label="enter movie name"
+      error={errors.name && touched.name}
+      helperText={errors.name && touched.name && errors.name}
+       variant="filled" />
+      
 
-      <TextField value={rating}
-      onChange={(event)=>setRating(event.target.value)}  label="enter movie rating" variant="filled" />
+      <TextField id="rating" 
+      name="rating" 
+      value = {values.rating} 
+      onChange={handleChange} 
+      onBlur={handleBlur}  
+      label="enter movie rating" 
+      error={errors.rating && touched.rating}
+       helperText={errors.rating && touched.rating && errors.rating}
+      variant="filled" />
+      
 
-      <TextField value={summary}
-      onChange={(event)=>setSummary(event.target.value)}  label="enter movie summary" variant="filled" />
-
-      <TextField value={trailer}
-      onChange={(event)=>setTrailer(event.target.value)}  label="enter movie trailer" variant="filled" />
-    
-      <Button onClick={addMovie} variant="contained">Add movies</Button>
+      <TextField id="summary" 
+      name="summary" 
+      value = {values.summary} 
+      onChange={handleChange} 
+      onBlur={handleBlur}  label="enter movie summary" 
+      error= {errors.summary && touched.summary}
+      helperText= {errors.summary && touched.summary && errors.summary}
+      variant="filled" />
      
-    </div>
+      <TextField id="trailer" 
+      name="trailer" 
+      value = {values.trailer} 
+      onChange={handleChange} 
+      onBlur={handleBlur}  label="enter movie trailer"
+      error=  {errors.trailer && touched.trailer}
+      helperText= {errors.trailer && touched.trailer && errors.trailer}
+      variant="filled" />
+     
+      <Button type="submit" variant="contained">Add movies</Button>
+     
+    </form>
   );
 } 
 
@@ -337,26 +531,36 @@ function Counter(){
   </div>
   );
 }
-function MovieList({movies, setMovies}){
+function MovieList(){
+  const [movies, setMovies] = useState([]);
+  // App is mounted -> useEffect call only once -> inside fetch -> and setMovies 
+const getMovies = () => {
+  fetch("https://616d58f537f997001745d9d1.mockapi.io/movies", {method:"GET"})
+  .then((data)=>data.json())
+  .then((mvs)=>setMovies(mvs));
+};
+
+
+useEffect(getMovies, []);
+
+const deleteMovie = (id) =>{
+  fetch(`https://616d58f537f997001745d9d1.mockapi.io/movies/${id}`, {method:"DELETE"})
+  .then(()=>getMovies());
+};
+
   const history = useHistory();
   return(
     <section>
-         {movies.map(({pic, name, rating, summary},index)=>(
-       <Movie name={name} pic={pic} rating={rating} summary={summary} id={index}
+         {movies.map(({pic, name, rating, summary,id})=>(
+       <Movie key={id} name={name} pic={pic} rating={rating} summary={summary} id={id}
        deleteButton= {<IconButton aria-label="delete" color="error"
-       onClick={()=>{
-         console.log("deleting...",index);
-         const deleteIdx = index;
-         const remainingMovies = movies.filter((mv,idx)=>idx!==deleteIdx);
-         console.log("Remaining...",remainingMovies);
-         setMovies(remainingMovies);
-         }}>
+       onClick={()=> deleteMovie(id)}>
        <DeleteIcon />
      </IconButton>}
        editButton= {<IconButton 
         style={{marginLeft:"auto"}}
         aria-label="edit"  color="success"
-       onClick={()=>history.push("/movielist/edit/" + index)}>
+       onClick={()=>history.push("/movielist/edit/" + id)}>
        <EditIcon />
      </IconButton>}
        />
