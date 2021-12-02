@@ -24,6 +24,9 @@ import { useFormik } from 'formik';
 import * as yup from 'yup';
 
 
+// const API_URL = "https://616d58f537f997001745d9d1.mockapi.io";
+const API_URL = "https://b28wd-movies-db.herokuapp.com";
+
 export default function App() {
   // console.log("hi");
 
@@ -39,7 +42,7 @@ const darkTheme = createTheme({
 // App is mounted -> useEffect call only once -> inside fetch -> and setMovies 
 console.log(movies);
 useEffect(()=>{
-  fetch("https://616d58f537f997001745d9d1.mockapi.io/movies", {method:"GET"})
+  fetch(`${API_URL}/movies`, {method:"GET"})
   .then((data)=>data.json())
   .then((mvs)=>setMovies(mvs));
 }, []);
@@ -268,7 +271,7 @@ function MovieDetails() {
 const [moviedet, setMoviedet] = useState({});
 
 useEffect(()=>{
-  fetch(`https://616d58f537f997001745d9d1.mockapi.io/movies/${id}`, {method:"GET"})
+  fetch(`${API_URL}/movies/${id}`, {method:"GET"})
   .then((data)=>data.json())
   .then((mv)=>setMoviedet(mv));
 }, [id]);
@@ -300,7 +303,7 @@ function EditMovie(){
   // const moviedet = movies[id]; 
 const [moviedet, setMoviedet] = useState(null);
 useEffect(()=>{
-  fetch(`https://616d58f537f997001745d9d1.mockapi.io/movies/${id}`, {method:"GET"})
+  fetch(`${API_URL}/movies/${id}`, {method:"GET"})
   .then((data)=>data.json())
   .then((mv)=>setMoviedet(mv));
 }, [id]);
@@ -348,7 +351,7 @@ function UpdateMovie({moviedet}){
   // 2. body - data & json & pass id as params
   // 3. headers - JSON
 
-  fetch(`https://616d58f537f997001745d9d1.mockapi.io/movies/${moviedet.id}`, {
+  fetch(`${API_URL}/movies/${moviedet.id}`, {
     method:"PUT",
     body: JSON.stringify(updatedMovie),
     headers: {'Content-Type': 'application/json'},
@@ -448,7 +451,7 @@ const addMovie =(newMovies)=>{
 //   const newMovies= {pic, name, rating, summary,trailer};//shorthand
 //   // setMovies([...movies,newMovies]);
 console.log(newMovies)
-  fetch(`https://616d58f537f997001745d9d1.mockapi.io/movies`, {
+  fetch(`${API_URL}/movies`, {
     method:"POST",
     body: JSON.stringify(newMovies),
     headers: {'Content-Type': 'application/json'},
@@ -535,7 +538,7 @@ function MovieList(){
   const [movies, setMovies] = useState([]);
   // App is mounted -> useEffect call only once -> inside fetch -> and setMovies 
 const getMovies = () => {
-  fetch("https://616d58f537f997001745d9d1.mockapi.io/movies", {method:"GET"})
+  fetch(`${API_URL}/movies`, {method:"GET"})
   .then((data)=>data.json())
   .then((mvs)=>setMovies(mvs));
 };
@@ -544,23 +547,23 @@ const getMovies = () => {
 useEffect(getMovies, []);
 
 const deleteMovie = (id) =>{
-  fetch(`https://616d58f537f997001745d9d1.mockapi.io/movies/${id}`, {method:"DELETE"})
+  fetch(`${API_URL}/movies/${id}`, {method:"DELETE"})
   .then(()=>getMovies());
 };
 
   const history = useHistory();
   return(
     <section>
-         {movies.map(({pic, name, rating, summary,id})=>(
-       <Movie key={id} name={name} pic={pic} rating={rating} summary={summary} id={id}
+         {movies.map(({pic, name, rating, summary, id, _id})=>(
+       <Movie key={_id} name={name} pic={pic} rating={rating} summary={summary} id={_id}
        deleteButton= {<IconButton aria-label="delete" color="error"
-       onClick={()=> deleteMovie(id)}>
+       onClick={()=> deleteMovie(_id)}>
        <DeleteIcon />
      </IconButton>}
        editButton= {<IconButton 
         style={{marginLeft:"auto"}}
         aria-label="edit"  color="success"
-       onClick={()=>history.push("/movielist/edit/" + id)}>
+       onClick={()=>history.push("/movielist/edit/" + _id)}>
        <EditIcon />
      </IconButton>}
        />
